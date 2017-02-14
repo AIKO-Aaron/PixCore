@@ -72,10 +72,13 @@ public class PixWindow {
 	 *            The panel that should be rendered and updated from now.
 	 */
 	public void setPanel(PixPanel panel) {
-		for(Component c : frame.getComponents()) if(c instanceof Canvas) frame.remove(c);
+		if (this.panel != null) this.panel.stop();
+		for (Component c : frame.getComponents())
+			if (c instanceof Canvas) frame.remove(c);
 		this.panel = panel;
 		frame.add(panel.getSwingCanvas());
 		frame.pack();
+		panel.start();
 	}
 
 	/**
@@ -86,7 +89,7 @@ public class PixWindow {
 	public PixPanel getPanel() {
 		return panel;
 	}
-	
+
 	/**
 	 * Sets the width of the window
 	 * 
