@@ -13,7 +13,7 @@ import java.util.Arrays;
  * @author AIKO (Aaron Hodel) 2017
  *
  */
-public class PixRenderer extends BasicRenderer {
+public class PixRenderer extends Renderer {
 
 	public static final boolean ALPHA_ENABLED = false;
 	

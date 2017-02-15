@@ -1,4 +1,4 @@
-package ch.aiko.pix.input;
+package ch.aiko.pix.core;
 
 /**
  * A bsaic updatable for use with lambdas
@@ -11,6 +11,6 @@ public interface Updatable {
 	/**
 	 * Updates this object and its children
 	 */
-	public void update(); // TODO Input as parameter
+	public boolean update(); 
 	
 }

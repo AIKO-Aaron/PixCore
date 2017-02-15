@@ -3,12 +3,13 @@ package ch.aiko.pix.graphics.renderer;
 import java.awt.Graphics;
 
 /**
- * Core class of all renderer classes Contains most of the code for rendering complex stuff, in short everything that is not a single pixel This should be implemented by the child class and if it has a more efficient way to render something, the methods should be overridden
+ * Core class of all renderer classes.
+ * Contains most of the code for rendering complex stuff, in short everything that is not a single pixel This should be implemented by the child class and if it has a more efficient way to render something, the methods should be overridden
  * 
  * @author AIKO (Aaron Hodel) 2017
  *
  */
-public abstract class BasicRenderer {
+public abstract class Renderer {
 
 	/** If alpha isn't supported this mask will be added to every color, so it has full alpha */
 	public static final int ALPHA_MASK = 0xFF000000;
@@ -28,7 +29,7 @@ public abstract class BasicRenderer {
 	 * @param h
 	 *            The height of the drawable field
 	 */
-	public BasicRenderer(int w, int h) {
+	public Renderer(int w, int h) {
 		this.width = w;
 		this.height = h;
 	}
@@ -41,8 +42,7 @@ public abstract class BasicRenderer {
 	public abstract boolean supportsAlpha();
 
 	/**
-	 * Draws a single color on a single pixel in the panel.
-	 * (0|0) is in the upper left corner and coordinates go up when the point is going to the lower-right corner.
+	 * Draws a single color on a single pixel in the panel. (0|0) is in the upper left corner and coordinates go up when the point is going to the lower-right corner.
 	 * 
 	 * @param x
 	 *            The x coordinate to draw
@@ -64,7 +64,8 @@ public abstract class BasicRenderer {
 	/**
 	 * Finishes the rendering process and draws the image to the graphics object given
 	 * 
-	 * @param g The graphics of the panel to draw on
+	 * @param g
+	 *            The graphics of the panel to draw on
 	 */
 	public abstract void finishUp(Graphics g);
 

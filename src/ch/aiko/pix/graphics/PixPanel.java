@@ -5,9 +5,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
-import ch.aiko.pix.graphics.renderer.BasicRenderer;
+import ch.aiko.pix.graphics.renderer.Renderer;
+import ch.aiko.pix.core.Renderable;
+import ch.aiko.pix.core.Updatable;
 import ch.aiko.pix.graphics.renderer.PixRenderer;
-import ch.aiko.pix.input.Updatable;
 
 /**
  * Root of every rendering operation. This can't do anything alone. Every PixPanel that should be rendered, need to be added to a {@link PixWindow Window}.
@@ -23,7 +24,7 @@ public class PixPanel {
 	/**
 	 * The renderer which draws the stuff to the screen
 	 */
-	public BasicRenderer renderer;
+	public Renderer renderer;
 
 	/*
 	 * Temporary renderable to render tests
@@ -52,6 +53,8 @@ public class PixPanel {
 	 */
 	protected Thread updateThread = new Thread(() -> updateLoop(), "update_loop");
 
+	/** Also limit fps? */
+	public static final boolean LIMIT_FPS = true;
 	/** One second in nanoseconds */
 	public static final int SECOND = 1000000000;
 	/** How many updates we want per second */
@@ -128,9 +131,17 @@ public class PixPanel {
 	protected void renderLoop() {
 		rendering = true;
 		while (rendering) {
+			long start = System.nanoTime();
 			preRender();
 			++fps;
-			// No limiting fps
+			long end = System.nanoTime();
+			if (LIMIT_FPS && WAIT_TIME - end + start > 0) {
+				try {
+					Thread.sleep((WAIT_TIME - end + start) / 1000000, (int) (WAIT_TIME - end + start) % 1000000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -151,8 +162,13 @@ public class PixPanel {
 			preUpdate();
 			++ups;
 			long end = System.nanoTime();
-			while (end - start < WAIT_TIME)
-				end = System.nanoTime();
+			if (WAIT_TIME - end + start > 0) {
+				try {
+					Thread.sleep((WAIT_TIME - end + start) / 1000000, (int) (WAIT_TIME - end + start) % 1000000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -183,7 +199,7 @@ public class PixPanel {
 	 */
 	public void preUpdate() {
 		// TODO updates
-		if(updatable != null) updatable.update();
+		if (updatable != null) updatable.update();
 	}
 
 	/**

@@ -7,7 +7,8 @@ import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 
 // Soon be gone
-public class GraphicsRenderer extends BasicRenderer {
+@Deprecated
+public class GraphicsRenderer extends Renderer {
 
 	private BufferedImage img;
 	private Graphics g;
