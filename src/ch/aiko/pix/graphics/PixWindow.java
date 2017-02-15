@@ -3,6 +3,8 @@ package ch.aiko.pix.graphics;
 import java.awt.Canvas;
 import java.awt.Component;
 
+import ch.aiko.pix.input.PixListeners;
+
 import javax.swing.JFrame;
 
 /**
@@ -19,6 +21,8 @@ public class PixWindow {
 	private JFrame frame;
 	/** The panel this window currently contains and draws and updates */
 	private PixPanel panel = null;
+	/** The listeners for this frame */
+	PixListeners listeners = null;
 
 	/**
 	 * Creates a new window with a default {@link PixPanel Panel}.
@@ -32,14 +36,13 @@ public class PixWindow {
 	 */
 	public PixWindow(String title, int width, int height) {
 		frame = new JFrame(title);
+		listeners = new PixListeners(this);
 
 		// creates and adds panel to window
 		panel = new PixPanel(width, height, this);
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
-
-		// TODO start rendering process
 
 		frame.setVisible(true);
 	}
@@ -54,13 +57,12 @@ public class PixWindow {
 	 */
 	public PixWindow(String title, PixPanel panel) {
 		frame = new JFrame(title);
+		listeners = new PixListeners(this);
 
 		setPanel(panel);
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
-
-		// TODO start rendering process
 
 		frame.setVisible(true);
 	}
@@ -72,12 +74,16 @@ public class PixWindow {
 	 *            The panel that should be rendered and updated from now.
 	 */
 	public void setPanel(PixPanel panel) {
-		if (this.panel != null) this.panel.stop();
+		if (this.panel != null) {
+			this.panel.stop();
+			listeners.removeListeners(this.panel.getSwingCanvas());
+		}
 		for (Component c : frame.getComponents())
 			if (c instanceof Canvas) frame.remove(c);
 		this.panel = panel;
 		frame.add(panel.getSwingCanvas());
 		frame.pack();
+		listeners.addListeners(panel.getSwingCanvas());
 		panel.start();
 	}
 
@@ -88,6 +94,15 @@ public class PixWindow {
 	 */
 	public PixPanel getPanel() {
 		return panel;
+	}
+
+	/**
+	 * Fetches the java swing JFrame, which is used to display all the things
+	 * 
+	 * @return The JFrame
+	 */
+	public JFrame getSwingFrame() {
+		return frame;
 	}
 
 	/**

@@ -25,8 +25,8 @@ public class PixLayer extends Layer {
 	}
 	
 	@Override
-	public boolean update() {
-		return updatable.update();
+	public boolean update(Layer l) {
+		return updatable.update(l);
 	}
 
 	@Override

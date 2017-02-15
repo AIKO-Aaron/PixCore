@@ -29,7 +29,7 @@ public abstract class Layer implements Updatable, Renderable {
 	 * The Input handling object.
 	 * Individual for each layer
 	 */
-	protected Input input;
+	protected Input input = new Input(this);
 
 	/**
 	 * Sorts the children in ascending order (low level to high level)
@@ -56,6 +56,7 @@ public abstract class Layer implements Updatable, Renderable {
 				return;
 			}
 		}
+		children.add(children.size(), child);
 	}
 	
 	/**
@@ -104,9 +105,11 @@ public abstract class Layer implements Updatable, Renderable {
 	 */
 	public final void updateChildren() {
 		for (int i = children.size() - 1; i >= 0; i--) {
-			children.get(i).preUpdate();
-			children.get(i).updateChildren();
-			if(children.get(i).update()) break; // If the 
+			Layer c = children.get(i);
+			if(c == null) continue;
+			c.preUpdate();
+			c.updateChildren();
+			if(c.update(c)) break;
 		}
 	}
 

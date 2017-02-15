@@ -5,10 +5,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
-import ch.aiko.pix.graphics.renderer.Renderer;
-import ch.aiko.pix.core.Renderable;
-import ch.aiko.pix.core.Updatable;
 import ch.aiko.pix.graphics.renderer.PixRenderer;
+import ch.aiko.pix.graphics.renderer.Renderer;
 
 /**
  * Root of every rendering operation. This can't do anything alone. Every PixPanel that should be rendered, need to be added to a {@link PixWindow Window}.
@@ -16,7 +14,16 @@ import ch.aiko.pix.graphics.renderer.PixRenderer;
  * @author AIKO (Aaron Hodel) 2017
  *
  */
-public class PixPanel {
+public class PixPanel extends Layer {
+
+	/** Also limit fps? */
+	public static final boolean LIMIT_FPS = true;
+	/** One second in nanoseconds */
+	public static final int SECOND = 1000000000;
+	/** How many updates/frames(if enabled) we want per second */
+	public static final int DEST_UPS = 60;
+	/** How long we need to wait each update (update included) to achieve the dest_ups */
+	public static final int WAIT_TIME = SECOND / DEST_UPS;
 
 	/** The second and last swing object created... */
 	private Canvas canvas;
@@ -25,15 +32,6 @@ public class PixPanel {
 	 * The renderer which draws the stuff to the screen
 	 */
 	public Renderer renderer;
-
-	/*
-	 * Temporary renderable to render tests
-	 */
-	public Renderable renderable;
-	/**
-	 * Temporary Updatable to update tests
-	 */
-	public Updatable updatable;
 
 	/**
 	 * If this panel is currently rendering
@@ -53,14 +51,6 @@ public class PixPanel {
 	 */
 	protected Thread updateThread = new Thread(() -> updateLoop(), "update_loop");
 
-	/** Also limit fps? */
-	public static final boolean LIMIT_FPS = true;
-	/** One second in nanoseconds */
-	public static final int SECOND = 1000000000;
-	/** How many updates we want per second */
-	public static final int DEST_UPS = 60;
-	/** How long we need to wait each update (update included) to achieve the dest_ups */
-	public static final int WAIT_TIME = SECOND / DEST_UPS;
 
 	/**
 	 * The last time we read the ups & fps (nanoseconds)
@@ -130,18 +120,20 @@ public class PixPanel {
 	 */
 	protected void renderLoop() {
 		rendering = true;
+		int off = 0;
 		while (rendering) {
 			long start = System.nanoTime();
 			preRender();
 			++fps;
-			long end = System.nanoTime();
-			if (LIMIT_FPS && WAIT_TIME - end + start > 0) {
+			long sleep_time = WAIT_TIME - System.nanoTime() + start - off - 1800000;
+			if (LIMIT_FPS && sleep_time > 0) {
 				try {
-					Thread.sleep((WAIT_TIME - end + start) / 1000000, (int) (WAIT_TIME - end + start) % 1000000);
+					Thread.sleep(sleep_time / 1000000, (int) (sleep_time) % 1000000);
+					off = 0;
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			}
+			} else off = -(int)sleep_time;
 		}
 	}
 
@@ -150,6 +142,7 @@ public class PixPanel {
 	 */
 	protected void updateLoop() {
 		updating = true;
+		int off = 0;
 		while (updating) {
 			long start = System.nanoTime();
 			if (start > last_time + SECOND) {
@@ -158,17 +151,20 @@ public class PixPanel {
 				lastFPS = fps;
 				fps = 0;
 				ups = 0;
+				System.out.println(lastFPS + " FPS");
+				System.out.println(lastUPS + " UPS");
 			}
 			preUpdate();
 			++ups;
-			long end = System.nanoTime();
-			if (WAIT_TIME - end + start > 0) {
+			long sleep_time = WAIT_TIME - System.nanoTime() + start - off - 2000000;
+			if (sleep_time > 0) {
 				try {
-					Thread.sleep((WAIT_TIME - end + start) / 1000000, (int) (WAIT_TIME - end + start) % 1000000);
+					Thread.sleep(sleep_time / 1000000, (int) (sleep_time) % 1000000);
+					off = 0;
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			}
+			} else off = -(int)sleep_time;
 		}
 	}
 
@@ -183,8 +179,7 @@ public class PixPanel {
 			return;
 		}
 
-		if (renderer != null && renderable != null) renderable.render(renderer);
-		// TODO call children to draw
+		renderChildren(renderer);
 
 		Graphics g = bs.getDrawGraphics();
 
@@ -198,8 +193,7 @@ public class PixPanel {
 	 * Updates the panel and all of its children
 	 */
 	public void preUpdate() {
-		// TODO updates
-		if (updatable != null) updatable.update();
+		updateChildren();
 	}
 
 	/**
@@ -257,6 +251,33 @@ public class PixPanel {
 	 */
 	public int getHeight() {
 		return canvas.getHeight();
+	}
+
+	@Override
+	public boolean update(Layer l) {
+		// Don't update anything, but don't block anything either
+		return false;
+	}
+
+	@Override
+	public boolean render(Renderer r) {
+		// Don't render nor block anything
+		return false;
+	}
+
+	@Override
+	public int getLevel() {
+		// The lowest possible value....
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public void preRender(Renderer renderer) {}
+
+	@Override
+	public boolean blocksEvents() {
+		// Events need to pass through
+		return false;
 	}
 
 }

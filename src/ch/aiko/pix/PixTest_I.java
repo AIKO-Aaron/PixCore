@@ -1,6 +1,11 @@
 package ch.aiko.pix;
 
+import ch.aiko.pix.core.Renderable;
+import ch.aiko.pix.core.Updatable;
+import ch.aiko.pix.graphics.PixLayer;
 import ch.aiko.pix.graphics.PixWindow;
+
+import com.sun.glass.events.KeyEvent;
 
 public class PixTest_I {
 
@@ -11,19 +16,23 @@ public class PixTest_I {
 
 	public static void main(String[] args) {
 		PixWindow window = new PixWindow("Hello World", 960, 540);
-		window.getPanel().renderable = (r) -> {
+		Renderable re = (r) -> {
 			r.clear();
 			r.drawRect(xPos, yPos, 50, 50, 0xFFFF0000);
 			return false;
 		};
-		window.getPanel().updatable = () -> {
+		Updatable up = (l) -> {
 			xPos += xSpeed;
 			yPos += ySpeed;
 
+			if(l.getInput().popKeyPressed(KeyEvent.VK_ESCAPE)) System.exit(0);
+			
 			if (xPos + 50 + xSpeed >= window.getActualWidth() || xPos + xSpeed < 0) xSpeed = -xSpeed;
 			if (yPos + 50 + ySpeed >= window.getActualHeight() || yPos + ySpeed < 0) ySpeed = -ySpeed;
 			return false;
 		};
+		
+		window.getPanel().addChild(new PixLayer(re, up, 0));
 
 		System.out.println("Program finished....");
 		// Can do wathever you want
