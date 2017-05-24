@@ -28,7 +28,7 @@ public class PixListeners implements KeyListener, MouseListener, MouseMotionList
 	 * The maintainer of these listeners
 	 */
 	private PixWindow window;
-	
+
 	public PixListeners(PixWindow window) {
 		this.window = window;
 		addListeners(window.getSwingFrame());
@@ -37,13 +37,15 @@ public class PixListeners implements KeyListener, MouseListener, MouseMotionList
 	}
 
 	public final void addListeners(Component c) {
+		removeListeners(c);
+		
 		c.addKeyListener(this);
 		c.addMouseListener(this);
 		c.addMouseMotionListener(this);
 		c.addMouseWheelListener(this);
 		c.addComponentListener(this);
 	}
-	
+
 	public final void removeListeners(Component c) {
 		c.removeKeyListener(this);
 		c.removeMouseListener(this);
@@ -51,81 +53,136 @@ public class PixListeners implements KeyListener, MouseListener, MouseMotionList
 		c.removeMouseWheelListener(this);
 		c.removeComponentListener(this);
 	}
-	
 
 	@Override
-	public void componentResized(ComponentEvent e) {}
+	public void componentResized(ComponentEvent e) {
+		// window.getPanel().resetRenderer();
+		// TODO decide if needed or not
+		window.getPanel().getInput().newEvent(e);
+
+	}
 
 	@Override
-	public void componentMoved(ComponentEvent e) {}
+	public void componentMoved(ComponentEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void componentShown(ComponentEvent e) {}
+	public void componentShown(ComponentEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void componentHidden(ComponentEvent e) {}
+	public void componentHidden(ComponentEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowOpened(WindowEvent e) {}
+	public void windowOpened(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowClosing(WindowEvent e) {}
+	public void windowClosing(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowClosed(WindowEvent e) {}
+	public void windowClosed(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowIconified(WindowEvent e) {}
+	public void windowIconified(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowDeiconified(WindowEvent e) {}
+	public void windowDeiconified(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowActivated(WindowEvent e) {}
+	public void windowActivated(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowDeactivated(WindowEvent e) {}
+	public void windowDeactivated(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void mouseWheelMoved(MouseWheelEvent e) {}
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		// window.getPanel().getInput().mouseWheelMoved(e.getPreciseWheelRotation());
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void mouseDragged(MouseEvent e) {}
+	public void mouseDragged(MouseEvent e) {
+		// window.getPanel().getInput().mouseMoved(e.getX(), e.getY());
+		window.getPanel().getInput().newEvent(e);
+		// window.getPanel().getInput().mousePressed(e.getButton()); // Useful for what?
+	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		// window.getPanel().getInput().mouseMoved(e.getX(), e.getY());
+		window.getPanel().getInput().newEvent(e);
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void mousePressed(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {
+		// window.getPanel().getInput().mousePressed(e.getButton());
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {
+		// window.getPanel().getInput().mouseReleased(e.getButton());
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void mouseExited(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void keyTyped(KeyEvent e) {}
+	public void keyTyped(KeyEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		window.getPanel().getInput().keyPressed(e.getKeyCode());
+		// window.getPanel().getInput().keyPressed(e.getKeyCode());
+		window.getPanel().getInput().newEvent(e);
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {}
+	public void keyReleased(KeyEvent e) {
+		// window.getPanel().getInput().keyReleased(e.getKeyCode());
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowGainedFocus(WindowEvent e) {}
+	public void windowGainedFocus(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
 
 	@Override
-	public void windowLostFocus(WindowEvent e) {}
-	
+	public void windowLostFocus(WindowEvent e) {
+		window.getPanel().getInput().newEvent(e);
+	}
+
 }

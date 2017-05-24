@@ -1,6 +1,7 @@
 package ch.aiko.pix.graphics.renderer;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Transparency;
@@ -43,8 +44,20 @@ public class GraphicsRenderer extends Renderer {
 		g.fillRect(0, 0, width, height);
 	}
 
-	public void finishUp(Graphics g) {
-		g.drawImage(img, 0, 0, null);
+	public void finishUp(Graphics g, int w, int h) {
+		g.drawImage(img, 0, 0, w, h, null);
+	}
+
+	@Override
+	public void drawText(int x, int y, String text, int color, Font f) {
+		g.setColor(new Color(color));
+		g.setFont(f);
+		g.drawString(text, x, y);
+	}
+
+	@Override
+	public int getTextWidth(String s, Font f) {
+		return (int)g.getFontMetrics(f).getStringBounds(s, g).getWidth();
 	}
 
 }

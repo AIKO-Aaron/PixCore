@@ -1,10 +1,12 @@
 package ch.aiko.pix.graphics.renderer;
 
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 /**
- * Core class of all renderer classes.
- * Contains most of the code for rendering complex stuff, in short everything that is not a single pixel This should be implemented by the child class and if it has a more efficient way to render something, the methods should be overridden
+ * Core class of all renderer classes. Contains most of the code for rendering complex stuff, in short everything that is not a single pixel This should be implemented by the child class and if it has a more efficient way to render something, the methods should be overridden
  * 
  * @author AIKO (Aaron Hodel) 2017
  *
@@ -54,6 +56,37 @@ public abstract class Renderer {
 	public abstract void drawPixel(int x, int y, int color);
 
 	/**
+	 * Draws text to the screen! revolutionairy I know...
+	 * 
+	 * @param x
+	 *            The x of the upper left corner
+	 * @param y
+	 *            The y of the upper left corner
+	 * @param text
+	 *            The text to draw
+	 * @param color
+	 *            The color to draw the text in
+	 * @param font
+	 *            The font to draw the text in
+	 * @param mods
+	 *            The modifiers for the font
+	 * @param size
+	 *            The size to draw the text in
+	 */
+	public abstract void drawText(int x, int y, String text, int color, Font f);
+
+	/**
+	 * Gets the width in pixels of a string in a font
+	 * 
+	 * @param s
+	 *            The String
+	 * @param f
+	 *            The Font
+	 * @return
+	 */
+	public abstract int getTextWidth(String s, Font f);
+
+	/**
 	 * Resets the whole screen to one color. Abstract because every renderer has their own way to do it. If there is no other way, you have to iterate over every pixel in the field and call drawPixel for it.
 	 * 
 	 * @param color
@@ -67,7 +100,7 @@ public abstract class Renderer {
 	 * @param g
 	 *            The graphics of the panel to draw on
 	 */
-	public abstract void finishUp(Graphics g);
+	public abstract void finishUp(Graphics g, int w, int h);
 
 	/**
 	 * Clears the screen to black
@@ -97,6 +130,107 @@ public abstract class Renderer {
 				drawPixel(xx, yy, color);
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param img
+	 *            The Image to draw
+	 * @param x
+	 *            The upper left corner of the image
+	 * @param y
+	 *            The upper left corner of the image
+	 */
+	public void drawImage(Image img, int x, int y) {
+		if (img instanceof BufferedImage) drawImage((BufferedImage) img, x, y);
+		else {
+			BufferedImage nImg = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+			nImg.getGraphics().drawImage(img, x, y, null);
+			drawImage(nImg, x, y);
+		}
+	}
+
+	/**
+	 * 
+	 * @param img
+	 *            The Image to draw
+	 * @param x
+	 *            The upper left corner of the image
+	 * @param y
+	 *            The upper left corner of the image
+	 */
+	public void drawImage(BufferedImage img, int x, int y) {
+		int w = img.getWidth();
+		int h = img.getHeight();
+		int[] pi = new int[w * h];
+		pi = img.getRGB(0, 0, w, h, pi, 0, w);
+		for (int yy = 0; yy < h; yy++) {
+			for (int xx = 0; xx < w; xx++) {
+				if (supportsAlpha() && (pi[xx + yy * w] >> 24 & 0xFF) <= 0) continue; // alpha = 0
+				drawPixel(x + xx, y + yy, pi[xx + yy * w]);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param img
+	 *            The Image to draw
+	 * @param x
+	 *            The upper left corner of the image
+	 * @param y
+	 *            The upper left corner of the image
+	 */
+	public void drawImage(BufferedImage img, int x, int y, int w, int h) {
+		BufferedImage img2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		img2.getGraphics().drawImage(img, 0, 0, w, h, null);
+		drawImage(img2, x, y);
+	}
+
+	/**
+	 * Draws an image to the screen. Just draws the region specified
+	 * 
+	 * @param img
+	 *            The image to draw
+	 * @param x
+	 *            The x-coordinate where to draw the image
+	 * @param y
+	 *            The y-coordinate where to draw the image
+	 * @param x1
+	 *            The x-coordinate of the upper-left corner of the bounds in the picture
+	 * @param y1
+	 *            The y-coordinate of the upper-left corner of the bounds in the picture
+	 * @param w
+	 *            The width of the bounds to draw
+	 * @param h
+	 *            The height of the bounds to draw
+	 */
+	public void drawImage(BufferedImage img, int x, int y, int x1, int y1, int w, int h) {
+		int[] pi = img.getRGB(x1, y1, w, h, null, 0, w);
+		for (int yy = 0; yy < h; yy++) {
+			for (int xx = 0; xx < w; xx++) {
+				if (supportsAlpha() && (pi[xx + x1 + (yy + y1) * w] >> 24 & 0xFF) <= 0) continue; // alpha = 0
+				drawPixel(x + xx, y + yy, pi[xx + x1 + (yy + y1) * w]);
+			}
+		}
+	}
+
+	/**
+	 * Fills a rectangle on the screen with the given color
+	 * 
+	 * @param x
+	 *            The x coordinate of the upper left corner of the rectangle
+	 * @param y
+	 *            The y coordinate of the upper left corner of the rectangle
+	 * @param w
+	 *            The width of the rectangle
+	 * @param h
+	 *            The height of the rectangle
+	 * @param color
+	 *            The color of the rectangle
+	 */
+	public void fillRect(float x, float y, float w, float h, int color) {
+		fillRect((int) x, (int) y, (int) w, (int) h, color);
 	}
 
 	/**
@@ -285,6 +419,79 @@ public abstract class Renderer {
 	 */
 	public void drawPolygon(int[] xPoints, int[] yPoints, int color) {
 		drawPolygon(xPoints, yPoints, 1, color);
+	}
+
+	/**
+	 * Renders text to the screen and cuts off after width
+	 * 
+	 * @param x
+	 *            The x position of the upper left corner of the text
+	 * @param y
+	 *            The y position of the upper left corner of the text
+	 * @param width
+	 *            The maximum width of the text
+	 * @param text
+	 *            The text to render
+	 * @param color
+	 *            The color to render the text in
+	 * @param f
+	 *            The Font to use
+	 * @return The amount of characters that had to be cut off
+	 */
+	public int drawTextLimit(int x, int y, int width, String text, int color, Font f) {
+		int i = 0;
+		while (getTextWidth(text, f) > width) {
+			text = text.substring(0, text.length() - 1);
+			i++;
+		}
+		drawText(x, y, text, color, f);
+		return i;
+	}
+
+	/**
+	 * Retrieves the width of this renderer
+	 * 
+	 * @return The width
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * Retrieves the height of this renderer
+	 * 
+	 * @return The height
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * 
+	 * @param x
+	 *            x position
+	 * @param y
+	 *            y position
+	 * @param width
+	 * @param height
+	 * @param color
+	 *            the color of the rect
+	 */
+	public void drawRoundedRect(int x, int y, int width, int height, int color) {
+		double m = Math.min(width, height) / 2; // radius
+		for (int yy = y; yy < y + height; yy++) {
+			for (int xx = x; xx < x + width; xx++) {
+				if (xx < x + m && yy < y + m) {
+					if (Math.sqrt((xx - x - m) * (xx - x - m) + (yy - y - m) * (yy - y - m)) <= m) drawPixel(xx, yy, color);
+				} else if (xx < x + m && yy > y + height - m) {
+					if (Math.sqrt((xx - x - m) * (xx - x - m) + (yy - y - m) * (yy - y - m)) <= m) drawPixel(xx, yy, color);
+				} else if (xx > x + width - m && yy > y + height - m) {
+					if (Math.sqrt((xx - x - width + m) * (xx - x - width + m) + (yy - y - m) * (yy - y - m)) <= m) drawPixel(xx, yy, color);
+				} else if (xx > x + width - m && yy < y + m) {
+					if (Math.sqrt((xx - x - width + m) * (xx - x - width + m) + (yy - y - m) * (yy - y - m)) <= m) drawPixel(xx, yy, color);
+				} else drawPixel(xx, yy, color);
+			}
+		}
 	}
 
 }

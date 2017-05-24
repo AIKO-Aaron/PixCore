@@ -30,8 +30,8 @@ public class PixLayer extends Layer {
 	}
 
 	@Override
-	public boolean render(Renderer r) {
-		return renderable.render(r);
+	public void render(Renderer r) {
+		renderable.render(r);
 	}
 
 	@Override
@@ -47,6 +47,11 @@ public class PixLayer extends Layer {
 
 	@Override
 	public boolean blocksEvents() {
+		return false;
+	}
+
+	@Override
+	public boolean blocksRender() {
 		return false;
 	}
 

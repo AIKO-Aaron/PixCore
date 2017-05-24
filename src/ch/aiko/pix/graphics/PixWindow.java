@@ -3,6 +3,7 @@ package ch.aiko.pix.graphics;
 import java.awt.Canvas;
 import java.awt.Component;
 
+import ch.aiko.pix.input.Input;
 import ch.aiko.pix.input.PixListeners;
 
 import javax.swing.JFrame;
@@ -23,6 +24,7 @@ public class PixWindow {
 	private PixPanel panel = null;
 	/** The listeners for this frame */
 	PixListeners listeners = null;
+
 
 	/**
 	 * Creates a new window with a default {@link PixPanel Panel}.
@@ -45,6 +47,8 @@ public class PixWindow {
 		frame.setLocationRelativeTo(null);
 
 		frame.setVisible(true);
+		
+		Input.disableAccentMenuMac();
 	}
 
 	/**
@@ -65,6 +69,8 @@ public class PixWindow {
 		frame.setLocationRelativeTo(null);
 
 		frame.setVisible(true);
+		
+		Input.disableAccentMenuMac();
 	}
 
 	/**

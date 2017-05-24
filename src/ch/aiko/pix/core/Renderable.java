@@ -16,6 +16,6 @@ public interface Renderable {
 	 * 
 	 * @param r The renderer to do so
 	 */
-	public boolean render(Renderer r);
+	public void render(Renderer r);
 	
 }

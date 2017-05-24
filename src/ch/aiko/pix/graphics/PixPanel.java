@@ -51,16 +51,20 @@ public class PixPanel extends Layer {
 	 */
 	protected Thread updateThread = new Thread(() -> updateLoop(), "update_loop");
 
-
 	/**
 	 * The last time we read the ups & fps (nanoseconds)
 	 */
 	private long last_time = System.nanoTime();
 
 	/**
-	 * ups and fps counting UPS and FPS from the the last second
+	 * ups and fps counting UPS and FPS from the the last second dest_slow is how many fps it should be slower --> 60 fps - dest_slow fps
 	 */
-	protected int ups, fps, lastUPS, lastFPS;
+	protected int ups, fps, lastUPS, lastFPS, dest_slow = 0;
+	
+	/**
+	 * The size of the renderable content
+	 */
+	protected int renderingWidth, renderingHeight;
 
 	/**
 	 * Creates a new {@link PixPanel} with the given width and height.
@@ -73,6 +77,9 @@ public class PixPanel extends Layer {
 	public PixPanel(int width, int height) {
 		canvas = new Canvas();
 		canvas.setPreferredSize(new Dimension(width, height));
+		
+		this.renderingWidth = width;
+		this.renderingHeight = height;
 
 		renderer = new PixRenderer(width, height);
 	}
@@ -89,6 +96,10 @@ public class PixPanel extends Layer {
 	 */
 	public PixPanel(int width, int height, PixWindow addTo) {
 		this(width, height);
+		
+		this.renderingWidth = width;
+		this.renderingHeight = height;
+		
 		addToWindow(addTo); // Alternatively addTo.setPanel(this);
 	}
 
@@ -115,25 +126,27 @@ public class PixPanel extends Layer {
 		}
 	}
 
+	public void setUPS(int slow) {
+		dest_slow = slow < 0 || slow >= 60 ? 0 : 60 - slow;
+	}
+
 	/**
 	 * run function of the render thread
 	 */
 	protected void renderLoop() {
 		rendering = true;
-		int off = 0;
 		while (rendering) {
 			long start = System.nanoTime();
 			preRender();
 			++fps;
-			long sleep_time = WAIT_TIME - System.nanoTime() + start - off - 1800000;
+			long sleep_time = WAIT_TIME + start - System.nanoTime();
 			if (LIMIT_FPS && sleep_time > 0) {
 				try {
 					Thread.sleep(sleep_time / 1000000, (int) (sleep_time) % 1000000);
-					off = 0;
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			} else off = -(int)sleep_time;
+			}
 		}
 	}
 
@@ -142,7 +155,6 @@ public class PixPanel extends Layer {
 	 */
 	protected void updateLoop() {
 		updating = true;
-		int off = 0;
 		while (updating) {
 			long start = System.nanoTime();
 			if (start > last_time + SECOND) {
@@ -151,20 +163,19 @@ public class PixPanel extends Layer {
 				lastFPS = fps;
 				fps = 0;
 				ups = 0;
-				System.out.println(lastFPS + " FPS");
-				System.out.println(lastUPS + " UPS");
+				// System.out.println(lastFPS + " FPS");
+				// System.out.println(lastUPS + " UPS");
 			}
 			preUpdate();
 			++ups;
-			long sleep_time = WAIT_TIME - System.nanoTime() + start - off - 2000000;
+			long sleep_time = SECOND / (DEST_UPS - dest_slow) - System.nanoTime() + start - 2000000;
 			if (sleep_time > 0) {
 				try {
 					Thread.sleep(sleep_time / 1000000, (int) (sleep_time) % 1000000);
-					off = 0;
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			} else off = -(int)sleep_time;
+			}
 		}
 	}
 
@@ -175,7 +186,7 @@ public class PixPanel extends Layer {
 		if (!canvas.isDisplayable()) return;
 		BufferStrategy bs = canvas.getBufferStrategy();
 		if (bs == null) {
-			canvas.createBufferStrategy(3);
+			canvas.createBufferStrategy(2);
 			return;
 		}
 
@@ -183,7 +194,7 @@ public class PixPanel extends Layer {
 
 		Graphics g = bs.getDrawGraphics();
 
-		renderer.finishUp(g);
+		renderer.finishUp(g, getWidth(), getHeight());
 
 		g.dispose();
 		bs.show();
@@ -213,6 +224,14 @@ public class PixPanel extends Layer {
 	 */
 	public Canvas getSwingCanvas() {
 		return canvas;
+	}
+
+	/**
+	 * Deletes the old renderer and creates a new one. In case the component has been resized, it will create the renderer with the new size
+	 * 
+	 */
+	public void resetRenderer() {
+		if (getWidth() != 0 && getHeight() != 0) renderer = new PixRenderer(getWidth(), getHeight());
 	}
 
 	/**
@@ -260,9 +279,8 @@ public class PixPanel extends Layer {
 	}
 
 	@Override
-	public boolean render(Renderer r) {
+	public void render(Renderer r) {
 		// Don't render nor block anything
-		return false;
 	}
 
 	@Override
@@ -279,5 +297,30 @@ public class PixPanel extends Layer {
 		// Events need to pass through
 		return false;
 	}
+
+	@Override
+	public boolean blocksRender() {
+		return false;
+	}
+
+
+	/**
+	 * Get the width the renderer can draw to
+	 * 
+	 * @return The width of the canvas
+	 */
+	public int getRenderingWidth() {
+		return renderingWidth;
+	}
+
+	/**
+	 * Get the height the renderer can draw to
+	 * 
+	 * @return The height of the canvas
+	 */
+	public int getRenderingHeight() {
+		return renderingHeight;
+	}
+
 
 }
